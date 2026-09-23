@@ -13,7 +13,7 @@ TASSEER Support API (this repo, FastAPI)
         │
         ├── reads ──► Tasseer MySQL DB (read-only)   ← Source of Truth
         │
-        └── calls ──► Claude (language understanding + reply generation)
+        └── calls ──► Gemini (language understanding + reply generation)
         │
         ▼
    reply to customer            (or, on escalation)
@@ -42,7 +42,7 @@ before this touches production traffic.
 ```
 app/
   core/           config, DB connection (read-only), auth, conversation logging
-  integrations/   Claude (LLM), WhatsApp Cloud API (human handoff)
+  integrations/   Gemini (LLM), WhatsApp Cloud API (human handoff)
   skills/         controlled read functions over the Tasseer DB (support_get_*)
   api/            FastAPI routes (/api/support/chat, /api/support/escalate)
 ```
@@ -56,7 +56,7 @@ the original concept note.
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env   # fill in DB (read-only user!), Anthropic key, WhatsApp config
+cp .env.example .env   # fill in DB (read-only user!), Gemini key, WhatsApp config
 uvicorn app.main:app --reload
 ```
 

@@ -17,10 +17,10 @@ services:
         sync: false
       - key: TASSEER_DB_PASSWORD
         sync: false
-      - key: ANTHROPIC_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
-      - key: ANTHROPIC_MODEL
-        value: claude-sonnet-5
+      - key: GEMINI_MODEL
+        value: gemini-flash-latest
       - key: TASSEER_API_BASE_URL
         value: https://api.ksatasseerltdapi.com
       - key: WHATSAPP_PHONE_NUMBER_ID

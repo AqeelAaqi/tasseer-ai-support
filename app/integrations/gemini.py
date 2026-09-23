@@ -1,18 +1,28 @@
-"""Language understanding + response generation, backed by Claude.
+"""Language understanding + response generation, backed by Gemini (free tier).
 
 The model NEVER receives raw DB access. It only ever sees the structured
 SupportContext this service already resolved from the database, and is
 instructed to explain it in natural language - not to invent facts.
+
+Uses Gemini's structured-output mode (response_mime_type + response_schema)
+rather than just asking the model to "reply with JSON" in the prompt text -
+this is enforced by the API itself, so parsing failures should be rare, but
+the fallback below still exists in case a response ever comes back empty or
+malformed.
 """
 
 from __future__ import annotations
 
-from anthropic import Anthropic
+import json
+
+from google import genai
+from google.genai import types
+from pydantic import BaseModel
 
 from app.core.config import settings
 from app.skills.context import SupportContext
 
-_client = Anthropic(api_key=settings.anthropic_api_key)
+_client = genai.Client(api_key=settings.gemini_api_key)
 
 SYSTEM_PROMPT = """You are TASSEER AI Support, an assistant embedded in the TASSEER app's \
 Support & Help section. TASSEER is a horse transport and horse-services marketplace in Saudi \
@@ -37,31 +47,33 @@ whatever they wrote in).
 - If the customer asks to speak to a human/agent/representative, or seems frustrated, or you \
 cannot resolve their question from the context, respond briefly and set escalate=true - the \
 handoff message itself is produced separately, don't write it yourself.
-
-Respond ONLY with a JSON object: {"reply": "<message to show the customer>", "escalate": true|false}
 """
+
+
+class _ReplySchema(BaseModel):
+    reply: str
+    escalate: bool
 
 
 def generate_reply(ctx: SupportContext, customer_message: str) -> dict:
     context_json = ctx.model_dump_json(indent=2)
-    response = _client.messages.create(
-        model=settings.anthropic_model,
-        max_tokens=400,
-        system=SYSTEM_PROMPT,
-        messages=[
-            {
-                "role": "user",
-                "content": f"CUSTOMER_CONTEXT:\n{context_json}\n\nCUSTOMER MESSAGE:\n{customer_message}",
-            }
-        ],
-    )
-    text = "".join(block.text for block in response.content if block.type == "text")
+    contents = f"CUSTOMER_CONTEXT:\n{context_json}\n\nCUSTOMER MESSAGE:\n{customer_message}"
 
-    import json
+    response = _client.models.generate_content(
+        model=settings.gemini_model,
+        contents=contents,
+        config=types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
+            max_output_tokens=400,
+            response_mime_type="application/json",
+            response_schema=_ReplySchema,
+        ),
+    )
 
     try:
-        parsed = json.loads(text)
+        parsed = json.loads(response.text)
         return {"reply": parsed["reply"], "escalate": bool(parsed.get("escalate", False))}
-    except (json.JSONDecodeError, KeyError):
-        # Model didn't follow the JSON contract - fail safe to a plain reply, no escalation guess.
-        return {"reply": text.strip(), "escalate": False}
+    except (json.JSONDecodeError, KeyError, TypeError):
+        # Structured output should make this unreachable in practice, but fail
+        # safe to a plain reply with no escalation guess rather than crash.
+        return {"reply": (response.text or "").strip(), "escalate": False}

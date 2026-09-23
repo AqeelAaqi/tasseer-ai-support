@@ -10,8 +10,8 @@ class Settings(BaseSettings):
     tasseer_db_user: str = ""
     tasseer_db_password: str = ""
 
-    anthropic_api_key: str = ""
-    anthropic_model: str = "claude-sonnet-5"
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-flash-latest"
 
     tasseer_api_base_url: str = "https://api.ksatasseerltdapi.com"
 

@@ -4,11 +4,11 @@ from pydantic import BaseModel
 
 from app.core.auth import SupportIdentity, verify_handoff_token
 from app.core.logging_store import log_message
-from app.integrations.claude import generate_reply
+from app.integrations.gemini import generate_reply
 from app.integrations.whatsapp import build_customer_deeplink, notify_support_team
 from app.skills.queries import resolve_support_context
 
-# resolve_support_context (sync MySQL query) and generate_reply (sync Anthropic
+# resolve_support_context (sync MySQL query) and generate_reply (sync Gemini
 # call) both do blocking I/O - run them off the event loop so one slow chat
 # doesn't stall every other request this instance is handling.
 
