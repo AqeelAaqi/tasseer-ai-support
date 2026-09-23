@@ -64,9 +64,14 @@ def generate_reply(ctx: SupportContext, customer_message: str) -> dict:
         contents=contents,
         config=types.GenerateContentConfig(
             system_instruction=SYSTEM_PROMPT,
-            max_output_tokens=400,
+            max_output_tokens=1024,
             response_mime_type="application/json",
             response_schema=_ReplySchema,
+            # This is a short, non-reasoning task (restate the given context
+            # naturally) - without this, 3.x-series models spend a chunk of
+            # max_output_tokens on internal reasoning before ever emitting
+            # the JSON, which was truncating the actual reply to nothing.
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
         ),
     )
 

@@ -20,7 +20,7 @@ services:
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_MODEL
-        value: gemini-flash-latest
+        value: gemini-3.6-flash
       - key: TASSEER_API_BASE_URL
         value: https://api.ksatasseerltdapi.com
       - key: WHATSAPP_PHONE_NUMBER_ID

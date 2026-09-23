@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     tasseer_db_password: str = ""
 
     gemini_api_key: str = ""
-    gemini_model: str = "gemini-flash-latest"
+    gemini_model: str = "gemini-3.6-flash"
 
     tasseer_api_base_url: str = "https://api.ksatasseerltdapi.com"
 
