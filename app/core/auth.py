@@ -4,14 +4,17 @@ Confirmed against the real Tasseer backend (api.ksatasseerltdapi.com,
 application/controllers/api/Users.php + application/libraries/
 Authorization_Token.php): customers already carry a long-lived HS256 JWT
 (`{id, username, user_type, time}`, ~360 day expiry, no server-side
-revocation list) that they send as `Authorization: Bearer <token>` on every
-API call. There is no separate sessions/tokens table this service could read
-instead.
+revocation list) that they send as a RAW `Authorization` header value on
+every API call - `Authorization_Token::validateToken()` passes the header
+straight to `JWT::decode()` with no `Bearer ` stripping, and the app's own
+`ApiClient` (composeApp/.../data/remote/ApiClient.kt) sends it the same way:
+`header("Authorization", authToken)`, no scheme prefix. There is no separate
+sessions/tokens table this service could read instead.
 
-So the in-app chat screen sends the SAME token the app already holds, and
-this service verifies it by calling the existing, already-authenticated
-`GET /api/user` endpoint on the main API (Users.php::user_get) rather than
-decoding the JWT itself. Two reasons this beats decoding locally:
+So the in-app chat screen sends that SAME raw token, and this service
+verifies it by calling the existing, already-authenticated `GET /api/user/en`
+endpoint on the main API (Users.php::user_get) rather than decoding the JWT
+itself. Two reasons this beats decoding locally:
   - no need to share the PHP app's JWT signing secret with a new service
   - `user_get` re-reads the live `users` row, so a deactivated account
     (`is_active = 0`) is caught even though `validateToken()` on the PHP

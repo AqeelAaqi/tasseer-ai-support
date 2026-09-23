@@ -67,6 +67,11 @@ uvicorn app.main:app --reload
 - `POST /api/support/escalate` — force a human handoff regardless of what the AI decided,
   returns a WhatsApp deep link prefilled with the order context.
 
+## Deploying
+
+See [`DEPLOY.md`](DEPLOY.md) — two ready paths: Namecheap/cPanel shared hosting (same account as
+the main API, via `passenger_wsgi.py`) or Render.com's free tier (via `render.yaml`).
+
 ## Roadmap
 
 1. Horse Transport support (this repo's initial focus)
