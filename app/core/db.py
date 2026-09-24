@@ -39,7 +39,11 @@ def _resolve_db_target() -> tuple[str, int]:
         (settings.ssh_tunnel_host, settings.ssh_tunnel_port),
         ssh_username=settings.ssh_tunnel_username,
         ssh_pkey=pkey,
-        remote_bind_address=(settings.tasseer_db_host, settings.tasseer_db_port),
+        # Explicit IP rather than settings.tasseer_db_host ("localhost") -
+        # the SSH server resolves this itself, and "localhost" as a bare
+        # hostname string caused connections to drop immediately during the
+        # MySQL handshake in testing; 127.0.0.1 works reliably.
+        remote_bind_address=("127.0.0.1", settings.tasseer_db_port),
     )
     _tunnel.start()
     return "127.0.0.1", _tunnel.local_bind_port
