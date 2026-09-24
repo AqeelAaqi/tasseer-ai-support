@@ -53,9 +53,12 @@ async def verify_handoff_token(authorization: str = Header(default="")) -> Suppo
     if cached and cached[0] > time.time():
         return cached[1]
 
-    url = f"{settings.tasseer_api_base_url.rstrip('/')}/api/user"
+    url = f"{settings.tasseer_api_base_url.rstrip('/')}/api/user/en"
     async with httpx.AsyncClient(timeout=10) as client:
-        resp = await client.get(url, headers={"Authorization": f"Bearer {token}"})
+        # Raw token, no "Bearer " prefix - the PHP JWT decoder reads this
+        # header value directly (see module docstring). Re-adding "Bearer "
+        # here was the actual bug that made every real session look invalid.
+        resp = await client.get(url, headers={"Authorization": token})
 
     if resp.status_code != 200:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Could not verify session")
