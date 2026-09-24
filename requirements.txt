@@ -10,3 +10,5 @@ httpx==0.28.1
 python-dotenv==1.0.1
 tenacity==9.0.0
 a2wsgi==1.10.7
+sshtunnel==0.4.0
+paramiko==3.5.0

@@ -17,6 +17,16 @@ services:
         sync: false
       - key: TASSEER_DB_PASSWORD
         sync: false
+      - key: SSH_TUNNEL_HOST
+        sync: false
+      - key: SSH_TUNNEL_PORT
+        value: "21098"
+      - key: SSH_TUNNEL_USERNAME
+        sync: false
+      - key: SSH_TUNNEL_PRIVATE_KEY
+        sync: false
+      - key: SSH_TUNNEL_PRIVATE_KEY_PASSPHRASE
+        sync: false
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_MODEL
